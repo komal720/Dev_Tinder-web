@@ -1,12 +1,42 @@
+import axios from "axios";
 import React from "react";
-import { useSelector } from "react-redux";
-import { Link, useLocation } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+
+import { removeUser } from "../utils/userSlice";
+import { BASE_URL } from "../utils/constants";
 
 const NavBar = () => {
   const user = useSelector((store) => store.user);
-  const location = useLocation();
 
-  console.log(user);
+  const dispatch = useDispatch();
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(
+        BASE_URL + "/logout",
+        {},
+        {
+          withCredentials: true,
+        }
+      );
+
+      // Remove user from Redux
+      dispatch(removeUser());
+
+      // Go to login page
+      navigate("/login");
+    } catch (err) {
+      console.error("Logout failed:", err);
+
+      // Remove user from Redux even if API has an issue
+      dispatch(removeUser());
+
+      navigate("/login");
+    }
+  };
 
   return (
     <div className="navbar bg-base-300 shadow-sm">
@@ -37,7 +67,10 @@ const NavBar = () => {
               <div className="w-10 rounded-full">
                 <img
                   alt="Profile"
-                  src="https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  src={
+                    user.photoUrl ||
+                    "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp"
+                  }
                 />
               </div>
             </div>
@@ -54,13 +87,13 @@ const NavBar = () => {
               </li>
 
               <li>
-                <Link to="/settings">
-                  ⚙️ Settings
+                <Link to="/connections">
+               👤  connections
                 </Link>
               </li>
 
               <li>
-                <button>
+                <button onClick={handleLogout}>
                   🚪 Logout
                 </button>
               </li>
