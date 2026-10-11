@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -18,29 +19,18 @@ const NavBar = () => {
       await axios.post(
         BASE_URL + "/logout",
         {},
-        {
-          withCredentials: true,
-        }
+        { withCredentials: true }
       );
-
-      // Remove user from Redux
-      dispatch(removeUser());
-
-      // Go to login page
-      navigate("/login");
     } catch (err) {
       console.error("Logout failed:", err);
-
-      // Remove user from Redux even if API has an issue
+    } finally {
       dispatch(removeUser());
-
       navigate("/login");
     }
   };
 
   return (
-    <div className="navbar bg-base-300 shadow-sm">
-
+    <div className="navbar relative z-50 bg-base-300 shadow-sm">
       {/* Logo */}
       <div className="flex-1">
         <Link to="/" className="btn btn-ghost text-xl">
@@ -51,7 +41,7 @@ const NavBar = () => {
       {/* User */}
       <div className="flex-none">
         {user && location.pathname !== "/login" && (
-          <div className="dropdown dropdown-end mx-5 flex items-center">
+          <div className="dropdown dropdown-end dropdown-bottom mx-5 flex items-center">
 
             {/* Welcome */}
             <div className="form-control">
@@ -78,31 +68,39 @@ const NavBar = () => {
             {/* Dropdown Menu */}
             <ul
               tabIndex={0}
-              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-10 mt-3 w-52 p-2 shadow"
+              className="menu menu-sm dropdown-content bg-base-100 rounded-box z-[9999] mt-3 w-52 p-2 shadow-lg"
             >
               <li>
                 <Link to="/profile">
                   👤 Profile
+                  <span className="badge">New</span>
                 </Link>
               </li>
 
               <li>
                 <Link to="/connections">
-               👤  connections
+                  👤 Connections
                 </Link>
               </li>
 
               <li>
-                <button onClick={handleLogout}>
-                  🚪 Logout
-                </button>
+                <Link to="/requests">
+                  👤 Requests
+                </Link>
               </li>
-            </ul>
 
+              <li>
+  <button
+    onClick={handleLogout}
+    className="!text-sm !font-normal"
+  >
+    🚪 Logout
+  </button>
+</li>
+            </ul>
           </div>
         )}
       </div>
-
     </div>
   );
 };

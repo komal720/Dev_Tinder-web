@@ -15,74 +15,84 @@ const Connections = () => {
   useEffect(() => {
     const fetchConnections = async () => {
       try {
-        setError("");
-
         const res = await axios.get(
           BASE_URL + "/user/connections",
           { withCredentials: true }
         );
 
-        console.log("Connections data:", res.data.data);
-
         dispatch(addConnections(res.data.data));
       } catch (err) {
-        console.error(
-          "Error fetching connections:",
-          err.response?.data || err.message
-        );
-
-        setError("Unable to load connections. Please log in again.");
+        console.error("Error fetching connections:", err);
+        setError("Unable to load connections.");
       } finally {
         setLoading(false);
       }
     };
 
     fetchConnections();
-  }, []);
+  }, [dispatch]);
 
-  if (loading) return <h1>Loading...</h1>;
+  if (loading) {
+    return <h1 className="text-center mt-10">Loading...</h1>;
+  }
 
-  if (error) return <h1>{error}</h1>;
+  if (error) {
+    return <h1 className="text-center mt-10">{error}</h1>;
+  }
 
   if (!connections || connections.length === 0) {
-    return <h1>No connections found</h1>;
+    return (
+      <h1 className="text-center mt-10">
+        No connections found
+      </h1>
+    );
   }
 
   return (
-    <div className="flex flex-col items-center my-10">
-      <h2 className="font-bold text-2xl mb-6">
+    <div className="flex flex-col items-center my-10 px-4">
+      <h2 className="font-bold text-2xl mb-8">
         Connections
       </h2>
 
-      {connections.map((connection) => {
-        const {
-          firstName,
-          lastName,
-          photoUrl,
-          age,
-          gender,
-          about,
-        } = connection;
+      <div className="flex flex-col items-center gap-6 w-full">
+        {connections.map((connection) => {
+          const {
+            firstName,
+            lastName,
+            photoUrl,
+            about,
+          } = connection;
 
-        return (
-          <div
-            key={connection._id}
-            className="m-4 p-4 rounded-lg bg-base-300"
-          >
-            <img
-              alt="photo"
-              className="w-20 h-20"
-              src={photoUrl}
-            />
+          return (
+            <div
+              key={connection._id}
+              className="flex items-center gap-4 p-5 rounded-xl bg-base-300 w-full max-w-md shadow-md"
+            >
+              <img
+                alt={`${firstName}'s profile`}
+                className="w-24 h-24 rounded-lg object-cover shrink-0"
+                src={
+                  photoUrl ||
+                  "https://placehold.co/200x200?text=Profile"
+                }
+              />
 
-            <h2>{firstName + " " + lastName}</h2>
+              <div className="min-w-0">
+                <h3 className="font-semibold text-lg">
+                  {firstName} {lastName}
+                </h3>
 
-            <p>{about}</p>
-          </div>
-        );
-      })}
+                <p className="text-sm opacity-80 break-words">
+                  {about || "This is default photo"}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 };
+
 
 export default Connections;

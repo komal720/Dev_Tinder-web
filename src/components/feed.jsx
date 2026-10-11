@@ -1,3 +1,4 @@
+
 import axios from "axios";
 import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -11,29 +12,33 @@ const Feed = () => {
   const dispatch = useDispatch();
 
   const getFeed = async () => {
-    if (feed) return;
+    if (feed !== null) return;
 
     try {
       const res = await axios.get(BASE_URL + "/feed", {
         withCredentials: true,
       });
 
-      dispatch(addFeed(res.data));
+      console.log("Feed response:", res.data);
+      dispatch(addFeed(res.data.data));
     } catch (err) {
-      console.error("Error fetching feed:", err);
+      console.error(
+        "Error fetching feed:",
+        err.response?.data || err.message
+      );
     }
   };
 
   useEffect(() => {
     getFeed();
-  }, [feed]);
+  }, []);
 
-  if (!feed) {
-    return <div>Loading...</div>;
+  if (feed === null) {
+    return <h1 className="text-center my-10">Loading...</h1>;
   }
 
   if (feed.length === 0) {
-    return <div className="text-center my-10">No users found in feed.</div>;
+    return <h1 className="text-center my-10">No new users</h1>;
   }
 
   return (
