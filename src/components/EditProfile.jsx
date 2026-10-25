@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import UserCard from "./UserCard";
 import { useDispatch } from "react-redux";
@@ -28,15 +29,27 @@ const EditProfile = ({ user }) => {
     setAbout(user?.about || "");
   }, [user]);
 
-  const saveProfile = async () => {
+  const saveProfile = async (e) => {
+    e.preventDefault();
     setError("");
     setSuccess("");
+
+    if (!firstName.trim() ) {
+      setError("First name  are required.");
+      return;
+    }
+
+    if (age !== "" && (Number(age) < 18 || Number(age) > 100)) {
+      setError("Age must be between 18 and 100.");
+      return;
+    }
+
     setLoading(true);
 
     try {
       const profileData = {
         firstName: firstName.trim(),
-        lastName: lastName.trim(),
+       
         photoUrl: photoUrl.trim(),
         age: age === "" ? undefined : Number(age),
         gender,
@@ -56,7 +69,7 @@ const EditProfile = ({ user }) => {
       }
 
       dispatch(addUser(updatedUser));
-      setSuccess("Profile updated successfully!");
+      setSuccess("Your profile has been updated successfully!");
     } catch (err) {
       console.error(
         "Profile update failed:",
@@ -69,8 +82,8 @@ const EditProfile = ({ user }) => {
         typeof message === "string"
           ? message
           : typeof err.response?.data === "string"
-          ? err.response.data
-          : err.message || "Failed to update profile"
+            ? err.response.data
+            : err.message || "Failed to update profile."
       );
     } finally {
       setLoading(false);
@@ -78,258 +91,264 @@ const EditProfile = ({ user }) => {
   };
 
   const inputClass =
-    "input input-sm w-full bg-base-200 border-base-200 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all duration-00";
+    "w-full rounded-xl border border-slate-700 bg-slate-800/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-slate-500 focus:border-violet-500 focus:ring-2 focus:ring-violet-500/20";
+
+  const labelClass =
+    "mb-2 block text-sm font-medium text-slate-300";
+
+  const previewUser = {
+    ...user,
+    firstName,
+    photoUrl,
+    age,
+    gender,
+    about,
+  };
 
   return (
-    <section className="min-h-screen bg-base-200 px-4 py-6">
-      <div className="max-w-5xl mx-auto">
+    <div className="relative min-h-screen overflow-hidden bg-slate-950 px-4 py-10 text-white sm:px-6 lg:px-8">
+      {/* Background decoration */}
+      <div className="pointer-events-none absolute -left-32 top-20 h-80 w-80 rounded-full bg-violet-600/10 blur-3xl" />
+      <div className="pointer-events-none absolute -right-32 bottom-20 h-80 w-80 rounded-full bg-pink-600/10 blur-3xl" />
 
-        {/* Page Heading */}
-        <div className="text-center mb-6">
-          <span className="inline-block px-3 py-1 mb-2 text-xs font-semibold tracking-wider uppercase rounded-full bg-primary/10 text-primary border border-primary/20">
-            Your Account
-          </span>
+      <div className="relative mx-auto max-w-6xl">
+        {/* Page heading */}
+        <div className="mb-10 text-center">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-violet-400/20 bg-violet-500/10 px-4 py-2 text-sm font-medium text-violet-300">
+            <span>✨</span>
+            Make it yours
+          </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-            Edit Your{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-500 to-pink-500">
-              Profile
-            </span>
+          <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl lg:text-5xl">
+            Edit Your <span className="text-violet-400">Profile</span>
           </h1>
 
-          <p className="mt-1 text-sm text-base-content/60">
-            Make your developer profile stand out.
+          <p className="mx-auto mt-4 max-w-xl text-sm leading-6 text-slate-400 sm:text-base">
+            Tell the community who you are. Update your details and make
+            your developer profile stand out.
           </p>
         </div>
 
-        {/* Form and Preview */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start">
+        <div className="grid items-start gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* Edit form */}
+          <section className="rounded-3xl border border-slate-800 bg-slate-900/80 p-5 shadow-2xl shadow-black/20 backdrop-blur-xl sm:p-8">
+            <div className="mb-7 flex items-center gap-4">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-600 to-pink-600 text-xl shadow-lg shadow-violet-900/30">
+                ⚙️
+              </div>
 
-          {/* Edit Profile Form */}
-          <div className="card bg-base-100 border border-base-300/70 shadow-lg rounded-2xl overflow-hidden">
-            <div className="h-1 bg-gradient-to-r from-primary via-purple-500 to-pink-500" />
+              <div>
+                <h2 className="text-xl font-bold">Personal information</h2>
+                <p className="mt-1 text-sm text-slate-400">
+                  Keep your profile details up to date.
+                </p>
+              </div>
+            </div>
 
-            <div className="card-body p-4 sm:p-5 gap-3">
+            {error && (
+              <div
+                role="alert"
+                className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300"
+              >
+                <span className="mr-2">⚠️</span>
+                {error}
+              </div>
+            )}
 
-              {/* Form Heading */}
-              <div className="flex items-center gap-3 mb-1">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center text-lg">
-                  ✏️
+            {success && (
+              <div
+                role="status"
+                className="mb-5 rounded-xl border border-emerald-500/20 bg-emerald-500/10 p-4 text-sm text-emerald-300"
+              >
+                <span className="mr-2">✓</span>
+                {success}
+              </div>
+            )}
+
+            <form onSubmit={saveProfile} className="space-y-5">
+              {/* Name fields */}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="firstName" className={labelClass}>
+                    First name *
+                  </label>
+                  <input
+                    id="firstName"
+                    type="text"
+                    placeholder="Enter first name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    autoComplete="given-name"
+                    maxLength={50}
+                    required
+                    className={inputClass}
+                  />
                 </div>
 
                 <div>
-                  <h2 className="text-lg font-bold">
-                    Personal Details
-                  </h2>
-                  <p className="text-xs text-base-content/50">
-                    Update your information
-                  </p>
+                  <label htmlFor="lastName" className={labelClass}>
+                    Last name *
+                  </label>
+                  <input
+                    id="lastName"
+                    type="text"
+                    placeholder="Enter last name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    autoComplete="family-name"
+                    maxLength={50}
+                
+                    className={inputClass}
+                  />
                 </div>
               </div>
 
-              {/* Error Message */}
-              {error && (
-                <div
-                  role="alert"
-                  className="alert alert-error rounded-xl text-sm py-2"
-                >
-                  <span>{error}</span>
-                </div>
-              )}
-
-              {/* Success Message */}
-              {success && (
-                <div
-                  role="status"
-                  className="alert alert-success rounded-xl text-sm py-2"
-                >
-                  <span>✓ {success}</span>
-                </div>
-              )}
-
-              {/* First Name */}
-              <div className="form-control gap-1">
-                <label className="label py-0">
-                  <span className="label-text text-sm font-semibold">
-                    First Name
-                  </span>
+              {/* Profile photo URL */}
+              <div>
+                <label htmlFor="photoUrl" className={labelClass}>
+                  Profile photo URL
                 </label>
 
                 <input
-                  type="text"
-                  placeholder="Enter first name"
-                  value={firstName}
-                  className={inputClass}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </div>
-
-              {/* Last Name */}
-              <div className="form-control gap-1">
-                <label className="label py-0">
-                  <span className="label-text text-sm font-semibold">
-                    Last Name
-                  </span>
-                </label>
-
-                <input
-                  type="text"
-                  placeholder="Enter last name"
-                  value={lastName}
-                  className={inputClass}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </div>
-
-              {/* Profile Photo URL */}
-              <div className="form-control gap-1">
-                <label className="label py-0">
-                  <span className="label-text text-sm font-semibold">
-                    Profile Photo URL
-                  </span>
-                </label>
-
-                <input
+                  id="photoUrl"
                   type="url"
                   placeholder="https://example.com/photo.jpg"
                   value={photoUrl}
-                  className={inputClass}
                   onChange={(e) => setPhotoUrl(e.target.value)}
+                  className={inputClass}
                 />
 
-                <p className="text-xs text-base-content/50">
-                  Add a link to your profile picture.
+                <p className="mt-2 text-xs text-slate-500">
+                  Paste a publicly accessible image URL.
                 </p>
               </div>
 
-              {/* Age and Gender */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="form-control gap-1">
-                  <label className="label py-0">
-                    <span className="label-text text-sm font-semibold">
-                      Age
-                    </span>
+              {/* Age and gender */}
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="age" className={labelClass}>
+                    Age
                   </label>
-
                   <input
+                    id="age"
                     type="number"
-                    placeholder="Age"
+                    placeholder="Enter age"
                     min="18"
+                    max="100"
                     value={age}
-                    className={inputClass}
                     onChange={(e) => setAge(e.target.value)}
+                    className={inputClass}
                   />
                 </div>
 
-                <div className="form-control gap-1">
-                  <label className="label py-0">
-                    <span className="label-text text-sm font-semibold">
-                      Gender
-                    </span>
+                <div>
+                  <label htmlFor="gender" className={labelClass}>
+                    Gender
                   </label>
-
-                  <input
-                    type="text"
-                    placeholder="Gender"
+                  <select
+                    id="gender"
                     value={gender}
-                    className={inputClass}
                     onChange={(e) => setGender(e.target.value)}
-                  />
+                    className={`${inputClass} appearance-none`}
+                  >
+                    <option value="" className="bg-slate-900">
+                      Select gender
+                    </option>
+                    <option value="male" className="bg-slate-900">
+                      Male
+                    </option>
+                    <option value="female" className="bg-slate-900">
+                      Female
+                    </option>
+                    <option value="other" className="bg-slate-900">
+                      Other
+                    </option>
+                  </select>
                 </div>
               </div>
 
               {/* About */}
-              <div className="form-control gap-1">
-                <label className="label py-0">
-                  <span className="label-text text-sm font-semibold">
-                    About You
+              <div>
+                <div className="mb-2 flex items-center justify-between gap-3">
+                  <label htmlFor="about" className={labelClass}>
+                    About you
+                  </label>
+                  <span className="text-xs text-slate-500">
+                    {about.length}/300
                   </span>
-                </label>
+                </div>
 
                 <textarea
-                  placeholder="Tell other developers about yourself..."
+                  id="about"
+                  placeholder="Tell other developers about yourself, your skills, and your interests..."
                   value={about}
-                  className="textarea textarea-bordered textarea-sm w-full min-h-24 resize-y bg-base-200 border-base-300 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary/50 transition-all duration-200"
                   onChange={(e) => setAbout(e.target.value)}
+                  rows={5}
+                  maxLength={300}
+                  className={`${inputClass} resize-y`}
                 />
-
-                <p className="text-xs text-base-content/50 text-right">
-                  {about.length} characters
-                </p>
               </div>
 
-              {/* Save Button */}
+              {/* Save button */}
               <button
-                type="button"
-                className="btn btn-primary btn-sm w-full mt-1 rounded-xl border-0 bg-gradient-to-r from-primary to-purple-600 text-white shadow-md hover:shadow-primary/30 transition-all duration-200"
-                onClick={saveProfile}
+                type="submit"
                 disabled={loading}
+                className="group flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-pink-600 px-5 py-3.5 font-bold text-white shadow-lg shadow-violet-900/30 transition duration-300 hover:-translate-y-0.5 hover:from-violet-500 hover:to-pink-500 disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
               >
                 {loading ? (
                   <>
-                    <span className="loading loading-spinner loading-xs" />
-                    Saving...
+                    <span className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                    Saving changes...
                   </>
                 ) : (
                   <>
-                    Save Changes <span>→</span>
+                    <span>✓</span>
+                    Save Profile
+                    <span className="transition-transform group-hover:translate-x-1">
+                      →
+                    </span>
                   </>
                 )}
               </button>
-            </div>
-          </div>
 
-          {/* Live Preview */}
-          <div className="flex flex-col gap-3">
+              <p className="text-center text-xs text-slate-500">
+                Your updated information will appear on your profile.
+              </p>
+            </form>
+          </section>
 
-            {/* Preview Heading */}
-            <div className="flex items-center gap-2 px-1">
-              <div className="w-8 h-8 rounded-xl bg-secondary/10 flex items-center justify-center text-base">
-                👀
-              </div>
-
-              <div>
-                <h2 className="text-lg font-bold">
-                  Live Preview
-                </h2>
-                <p className="text-xs text-base-content/50">
-                  See how your profile looks
-                </p>
-              </div>
-            </div>
-
-            {/* Compact Preview Container */}
-            <div className="rounded-2xl p-2 sm:p-3 bg-base-100 border border-base-300/70 shadow-lg w-full max-w-sm mx-auto">
-              <UserCard
-                user={{
-                  ...user,
-                  firstName,
-                  lastName,
-                  photoUrl,
-                  age,
-                  gender,
-                  about,
-                }}
-              />
+          {/* Live preview */}
+          <aside className="lg:sticky lg:top-24">
+            <div className="mb-5">
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-400">
+                Live preview
+              </p>
+              <h2 className="mt-2 text-2xl font-bold">
+                How others see you
+              </h2>
+              <p className="mt-2 text-sm leading-6 text-slate-400">
+                Your preview updates as you edit your information.
+              </p>
             </div>
 
-            {/* Pro Tip */}
-            <div className="flex items-start gap-2 rounded-xl border border-primary/15 bg-primary/5 p-3">
-              <span className="text-base">💡</span>
+            <div className="rounded-3xl border border-slate-800 bg-slate-900/60 p-4 shadow-xl sm:p-6">
+              <UserCard user={previewUser} />
+            </div>
 
-              <p className="text-xs leading-relaxed text-base-content/70">
-                <span className="font-semibold text-base-content">
+            <div className="mt-4 flex items-start gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4">
+              <span className="text-xl">💡</span>
+              <p className="text-sm leading-6 text-slate-400">
+                <span className="font-semibold text-slate-200">
                   Pro tip:
                 </span>{" "}
-                Add a clear photo and a meaningful bio to help other
+                Add a clear profile photo and a meaningful bio to help other
                 developers get to know you.
               </p>
             </div>
-          </div>
-
+          </aside>
         </div>
       </div>
-    </section>
+    </div>
   );
 };
 
